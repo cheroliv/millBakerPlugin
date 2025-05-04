@@ -1,0 +1,46 @@
+= Static site based on Scala, JBake, Mill, JGit and GitHubPages
+
+https://docs.scala-lang.org/[Scala]
++ https://scalameta.org/metals/docs/build-tools/mill/[Mill]
++ https://jbake.org/[JBake]
++ https://pages.github.com/[Github Pages]
+
+.clone this repository :
+
+== List available tasks
+
+[source,bash]
+----
+./millw resolve _
+----
+
+== Run in live local mode :
+.Launch local server
+[source,bash]
+----
+./millw jbakeServe
+----
+
+Open in your browser this url : http://localhost:8820/[localhost:8820]
+
+.Stop the local server
+[source,bash]
+----
+killall java
+----
+
+
+== Deploy to GitHub Pages
+
+=== Github pages repository
+. create a dedicated repository in order to host the static site.
+. set the github pages behavior in repo's settings
+. create a token to give autorisations on the github pages repository
+. Add a secret name ```PUSH_TOKEN``` to the repositroy who contains source mill script
+
+=== Publish to GitHub Pages
+
+[source,bash]
+----
+./millw publishSite
+----

@@ -1,0 +1,16 @@
+bake:
+  srcPath: "."
+  destDirPath: "bake"
+  cname: "cheroliv.com"
+pushPage:
+  from: "bake"
+  to: "cvs"
+  repo:
+    name: "cheroliv.github.io"
+    repository: "https://github.com/cheroliv/cheroliv.github.io.git"
+    credentials:
+      username: "cheroliv"
+      # Note: you can pass the password using environment variable $PUSH_TOKEN
+      # password: "mytoken"
+  branch: "master"
+  message: "cheroliv.com"

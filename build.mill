@@ -1,0 +1,36 @@
+import $ivy.`io.chris-kipp::mill-ci-release::0.1.9`
+
+import mill._, scalalib._
+import mill.scalalib.publish._
+import io.kipp.mill.ci.release.CiReleaseModule
+
+object `package` extends RootModule with ScalaModule with CiReleaseModule {
+
+  def scalaVersion = "2.13.16"
+
+  val millVersion = "0.12.10"
+  val millPlatform = millVersion.replaceAll("\\.[0-9]+$", "")
+
+  def ivyDeps = Agg(
+    ivy"com.lihaoyi::mill-main:$millVersion",
+    ivy"com.lihaoyi::mill-scalalib:$millVersion",
+    ivy"de.tototec::de.tobiasroeser.mill.jbake_mill0.11:0.3.1",
+    ivy"org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r",
+    ivy"org.eclipse.jgit:org.eclipse.jgit.archive:6.8.0.202311291450-r",
+    ivy"org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:6.8.0.202311291450-r"
+  )
+
+  def artifactSuffix = T(s"_mill${millPlatform}_${artifactScalaVersion()}")
+
+  def pomSettings = PomSettings(
+    description = "Mill plugin to wrap JBake+JGit+GithubPages.",
+    organization = "com.cheroliv",
+    url = "https://github.com/cheroliv/millBakerPlugin",
+    licenses = Seq(License.MIT),
+    versionControl = VersionControl.github("cheroliv", "millBakerPlugin"),
+    developers = Seq(
+      Developer("Cheroliv", "Cher Oliv", "https://github.com/cheroliv"),
+      Developer("Iltotore", "Raphaël FROMENTIN", "https://github.com/Iltotore")
+    )
+  )
+}

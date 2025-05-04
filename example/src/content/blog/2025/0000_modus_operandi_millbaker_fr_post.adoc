@@ -1,0 +1,26 @@
+= Créer son site statique sur github pages avec millBaker
+@CherOliv
+2025-03-24
+:jbake-title: Créer son site statique sur github pages
+:jbake-type: post
+:jbake-tags: scala, mill, jbake, asciidoc, github-pages
+:jbake-status: published
+:jbake-date: 2025-03-25
+:summary: Utiliser millBaker, pour créer son site perso a base de ticket avec asciidoc.
+:revdate: 2025-03-24
+:toc: left
+:icons: font
+:sectnumlevels: 6
+:sectnums:
+:toc-title: Sommaire
+
+// ._Temps de lecture :_
+// 12 à 15 minutes.
+
+
+._Public cible :_
+Créateur de contenut textuel en-ligne, en recherche de poste d'une technologie simple, efficace et gratuite.
+
+== TODO
+
+

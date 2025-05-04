@@ -1,0 +1,126 @@
+import $ivy.`de.tototec::de.tobiasroeser.mill.jbake_mill0.11:0.3.1`
+import $ivy.`org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r`
+import $ivy.`org.eclipse.jgit:org.eclipse.jgit.archive:6.8.0.202311291450-r`
+import $ivy.`org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:6.8.0.202311291450-r`
+import $ivy.`io.circe::circe-core:0.14.13`
+import $ivy.`io.circe::circe-generic:0.14.13`
+import $ivy.`io.circe::circe-yaml:0.16.0`
+
+import mill._
+import mill.api.Result
+import de.tobiasroeser.mill.jbake._
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.transport.{URIish, UsernamePasswordCredentialsProvider}
+
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.yaml.parser._
+import io.circe.syntax._
+
+case class GitPushConfiguration(
+  val from: String,
+  val to: String,
+  val repo: RepositoryConfiguration,
+  val branch: String,
+  val message: String,
+)
+
+case class RepositoryConfiguration(
+    val name: String,
+    val repository: String,
+    val credentials: RepositoryCredentials,
+)
+
+object RepositoryConfiguration {
+  val CName = "CNAME"
+  val Origin = "origin"
+  val Url = "url"
+  val Remote = "remote"
+}
+
+case class RepositoryCredentials(username: String, password: Option[String])
+
+case class SiteConfiguration(
+    val bake: BakeConfiguration,
+    val pushPage: GitPushConfiguration,
+    val pushSource: Option[GitPushConfiguration] = None,
+    val pushTemplate: Option[GitPushConfiguration] = None,
+)
+
+case class BakeConfiguration(
+    val srcPath: String,
+    val destDirPath: String,
+    val cname: Option[String],
+)
+
+object `package` extends RootModule with JBakeModule {
+
+  def jbakeVersion = "2.6.7"
+
+  def websiteSources: T[PathRef] = jbake
+
+  def websiteConfigPath: os.Path = millSourcePath / "managed-jbake-context.yml"
+
+  def websiteConfig: SiteConfiguration = {
+    val src = os.read(websiteConfigPath)
+    parse(src).flatMap(_.as[SiteConfiguration]).fold(
+      throw _,
+      identity
+    )
+  }
+
+  def publishSite(): Command[Unit] = Task.Command {
+    val config = websiteConfig
+
+    val passwordOrConfig = config.pushPage.repo.credentials.password
+      .orElse(sys.env.get("PUSH_TOKEN"))
+      .getOrElse(throw new IllegalArgumentException("No password found"))
+
+    os.copy.over(jbake().path, T.dest)
+    
+    config.bake.cname.foreach(cname => os.write(T.dest / "CNAME", cname))
+
+    val git =
+      Git
+        .init
+        .setDirectory(T.dest.toIO)
+        .setInitialBranch(config.pushPage.branch)
+        .call()
+
+    val repository = git.getRepository
+    
+    if (repository.isBare) Result.Failure("Repository is bare")
+    else {
+      T.log.info("Repository is not bare")
+
+      if (!repository.getDirectory.isDirectory) Result.Failure("Repository file must be a directory")
+      else {
+        T.log.info("Repository file is a directory")
+        // add remote repo:
+        git
+          .remoteAdd
+          .setName(RepositoryConfiguration.Origin)
+          .setUri(new URIish(config.pushPage.repo.repository))
+          .call()
+        //4) ajouter les fichiers du dossier cvs à l'index
+        git.add.addFilepattern(".").call()
+        //5) commit
+        git.commit.setMessage(config.pushPage.message).call()
+
+        git
+          .push
+          .setCredentialsProvider(
+            new UsernamePasswordCredentialsProvider(
+              config.pushPage.repo.credentials.username,
+              passwordOrConfig
+            )
+          )
+          .setRemote(RepositoryConfiguration.Origin)
+          .setForce(true)
+          .call()
+        
+        Result.Success(())
+      }
+    }
+  }
+}
