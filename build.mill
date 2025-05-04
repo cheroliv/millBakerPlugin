@@ -9,7 +9,7 @@ object `package` extends RootModule with ScalaModule with CiReleaseModule {
   def scalaVersion = "2.13.16"
 
   val millVersion = "0.12.10"
-  val millPlatform = millVersion.replaceAll("\\.[0-9]+$", "")
+  val millPlatform = "0.11"
 
   def ivyDeps = Agg(
     ivy"com.lihaoyi::mill-main:$millVersion",
@@ -19,6 +19,8 @@ object `package` extends RootModule with ScalaModule with CiReleaseModule {
     ivy"org.eclipse.jgit:org.eclipse.jgit.archive:6.8.0.202311291450-r",
     ivy"org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:6.8.0.202311291450-r"
   )
+
+  def artifactName: T[String] = "mill-baker"
 
   def artifactSuffix = T(s"_mill${millPlatform}_${artifactScalaVersion()}")
 

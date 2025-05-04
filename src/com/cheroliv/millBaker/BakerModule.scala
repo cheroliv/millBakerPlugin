@@ -19,19 +19,19 @@ trait BakerModule extends JBakeModule {
   def publishSite(): Command[Unit] = Task.Command {
     val config = websiteConfig
 
-    val passwordOrConfig = config.pushPage.repo.credentials.password
+    val passwordOrConfig = config.pushConfiguration.repo.credentials.password
       .orElse(sys.env.get("PUSH_TOKEN"))
       .getOrElse(throw new IllegalArgumentException("No password found"))
 
     os.copy.over(jbake().path, T.dest)
     
-    config.bake.cname.foreach(cname => os.write(T.dest / "CNAME", cname))
+    config.cname.foreach(cname => os.write(T.dest / "CNAME", cname))
 
     val git =
       Git
         .init
         .setDirectory(T.dest.toIO)
-        .setInitialBranch(config.pushPage.branch)
+        .setInitialBranch(config.pushConfiguration.branch)
         .call()
 
     val repository = git.getRepository
@@ -47,18 +47,18 @@ trait BakerModule extends JBakeModule {
         git
           .remoteAdd
           .setName(RepositoryConfiguration.Origin)
-          .setUri(new URIish(config.pushPage.repo.repository))
+          .setUri(new URIish(config.pushConfiguration.repo.repository))
           .call()
         //4) ajouter les fichiers du dossier cvs à l'index
         git.add.addFilepattern(".").call()
         //5) commit
-        git.commit.setMessage(config.pushPage.message).call()
+        git.commit.setMessage(config.pushConfiguration.message).call()
 
         git
           .push
           .setCredentialsProvider(
             new UsernamePasswordCredentialsProvider(
-              config.pushPage.repo.credentials.username,
+              config.pushConfiguration.repo.credentials.username,
               passwordOrConfig
             )
           )

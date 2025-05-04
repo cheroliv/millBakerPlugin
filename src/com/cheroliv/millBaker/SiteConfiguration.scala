@@ -1,8 +1,8 @@
 package com.cheroliv.millBaker
 
 case class SiteConfiguration(
-    val bake: BakeConfiguration,
-    val pushPage: GitPushConfiguration,
+    val pushConfiguration: GitPushConfiguration,
+    val cname: Option[String] = None,
     val pushSource: Option[GitPushConfiguration] = None,
-    val pushTemplate: Option[GitPushConfiguration] = None,
+    val pushTemplate: Option[GitPushConfiguration] = None
 )

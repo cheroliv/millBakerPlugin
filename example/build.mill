@@ -1,0 +1,25 @@
+import $ivy.`com.cheroliv::mill-baker::0.0.0-1-386f7f-DIRTYe48c0f81-SNAPSHOT`
+
+import mill._, scalalib._
+import com.cheroliv.millBaker._
+
+object `package` extends RootModule with BakerModule {
+  
+  def jbakeVersion = "2.6.7"
+
+  def websiteConfig = SiteConfiguration(
+    pushConfiguration = GitPushConfiguration(
+      repo = RepositoryConfiguration(
+        name = "mywebsite.foo",
+        repository = "https://github.com/user/repo.git",
+        credentials = RepositoryCredentials(
+          username = "user",
+          password = None //If None, use environment variable PUSH_TOKEN
+        )
+      ),
+      branch = "main",
+      message = "misc: Website update"
+    )
+  )
+
+}
