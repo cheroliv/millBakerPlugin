@@ -27,3 +27,6 @@ node_modules
 out
 .metals
 .bloop
+*.ipr
+*.iws
+*.iml
