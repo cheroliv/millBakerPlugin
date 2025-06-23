@@ -1,3 +1,6 @@
+secret.b64
+.bsp
+creds.xml
 #NODE_ENV=test
 .env
 *.hprof
